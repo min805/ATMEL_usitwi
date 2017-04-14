@@ -46,8 +46,17 @@
 #endif
 
 
+void SET_USI_TO_SEND_ACK(void );
+void SET_USI_TO_READ_ACK(void );
+void SET_USI_TO_START_CONDITION_MODE(void ); 
+void SET_USI_TO_SEND_DATA(void ); 
+void SET_USI_TO_READ_DATA(void ); 
+
+
+void usiTwi_flushTxBuffers(void);
+void usiTwi_flushRxBuffers(void);
 //Initialize TWI Slave
-void    usiTwiSlave_init( uint8_t ownAddress);
+void    usiTwi_Slave_init( uint8_t ownAddress);
 
 uint8_t usiTwi_is_DataInTxBuffer(void);
 

@@ -12,70 +12,67 @@
                         functions implemented as macros
 ********************************************************************************/
 
-#define SET_USI_TO_SEND_ACK( ) \
-{ \
-	/* prepare ACK */ \
-	USIDR = 0; \
-	/* set SDA as output */ \
-	DDR_USI |= ( 1 << PORT_USI_SDA ); \
-	/* clear all interrupt flags, except Start Cond */ \
-	USISR = \
-	( 0 << USISIF ) | ( 1 << USIOIF ) | ( 1 << USIPF ) | ( 1 << USIDC )| \
-	/* set USI counter to shift 1 bit */ \
-	( 0x0E << USICNT0 ); \
+void SET_USI_TO_SEND_ACK(void )
+{ 
+	/* prepare ACK */ 
+	USIDR = 0; 
+	/* set SDA as output */ 
+	DDR_USI |= ( 1 << PORT_USI_SDA ); 
+	/* clear all interrupt flags, except Start Cond */ 
+	USISR = 
+	( 0 << USISIF ) | ( 1 << USIOIF ) | ( 1 << USIPF ) | ( 1 << USIDC )| ( 0x0E << USICNT0 );
+	/* set USI counter to shift 1 bit */ 
 }
 
-#define SET_USI_TO_READ_ACK( ) \
-{ \
-	/* set SDA as input */ \
-	DDR_USI &= ~( 1 << PORT_USI_SDA ); \
-	/* prepare ACK */ \
-	USIDR = 0; \
-	/* clear all interrupt flags, except Start Cond */ \
-	USISR = \
-	( 0 << USISIF ) | ( 1 << USIOIF ) | ( 1 << USIPF ) | ( 1 << USIDC ) | \
-	/* set USI counter to shift 1 bit */ \
-	( 0x0E << USICNT0 ); \
+void SET_USI_TO_READ_ACK(void )
+{ 
+	/* set SDA as input */ 
+	DDR_USI &= ~( 1 << PORT_USI_SDA ); 
+	/* prepare ACK */
+	USIDR = 0; 
+	/* clear all interrupt flags, except Start Cond */ 
+	USISR = 
+	( 0 << USISIF ) | ( 1 << USIOIF ) | ( 1 << USIPF ) | ( 1 << USIDC ) | ( 0x0E << USICNT0 ); 
+	/* set USI counter to shift 1 bit */ 	
 }
 
-#define SET_USI_TO_START_CONDITION_MODE( ) \
-{ \
-	USICR = \
-	/* enable Start Condition Interrupt, disable Overflow Interrupt */ \
+void SET_USI_TO_START_CONDITION_MODE(void ) 
+{ 
+	USICR = 
+	/* enable Start Condition Interrupt, disable Overflow Interrupt */ 
 	( 1 << USISIE ) | ( 0 << USIOIE ) | \
-	/* set USI in Two-wire mode, no USI Counter overflow hold */ \
+	/* set USI in Two-wire mode, no USI Counter overflow hold */ 
 	( 1 << USIWM1 ) | ( 0 << USIWM0 ) | \
-	/* Shift Register Clock Source = External, positive edge */ \
-	/* 4-Bit Counter Source = external, both edges */ \
+	/* Shift Register Clock Source = External, positive edge */ 
+	/* 4-Bit Counter Source = external, both edges */ 
 	( 1 << USICS1 ) | ( 0 << USICS0 ) | ( 0 << USICLK ) | \
-	/* no toggle clock-port pin */ \
-	( 0 << USITC ); \
-	USISR = \
-	/* clear all interrupt flags, except Start Cond */ \
-	( 0 << USISIF ) | ( 1 << USIOIF ) | ( 1 << USIPF ) | \
-	( 1 << USIDC ) | ( 0x0 << USICNT0 ); \
+	/* no toggle clock-port pin */ 
+	( 0 << USITC ); 
+	USISR = 
+	/* clear all interrupt flags, except Start Cond */ 
+	( 0 << USISIF ) | ( 1 << USIOIF ) | ( 1 << USIPF ) | ( 1 << USIDC ) | ( 0x0 << USICNT0 ); 
+	
 }
 
-#define SET_USI_TO_SEND_DATA( ) \
-{ \
-	/* set SDA as output */ \
-	DDR_USI |=  ( 1 << PORT_USI_SDA ); \
-	/* clear all interrupt flags, except Start Cond */ \
-	USISR    =  \
-	( 0 << USISIF ) | ( 1 << USIOIF ) | ( 1 << USIPF ) | ( 1 << USIDC) | \
-	/* set USI to shift out 8 bits */ \
-	( 0x0 << USICNT0 ); \
+void SET_USI_TO_SEND_DATA(void ) 
+{ 
+	/* set SDA as output */ 
+	DDR_USI |=  ( 1 << PORT_USI_SDA ); 
+	/* clear all interrupt flags, except Start Cond */ 
+	USISR    =  
+	( 0 << USISIF ) | ( 1 << USIOIF ) | ( 1 << USIPF ) | ( 1 << USIDC) | ( 0x0 << USICNT0 ); 
+	/* set USI to shift out 8 bits */ 
 }
 
-#define SET_USI_TO_READ_DATA( ) \
-{ \
-	/* set SDA as input */ \
-	DDR_USI &= ~( 1 << PORT_USI_SDA ); \
-	/* clear all interrupt flags, except Start Cond */ \
-	USISR    = \
-	( 0 << USISIF ) | ( 1 << USIOIF ) | ( 1 << USIPF ) | ( 1 << USIDC ) | \
-	/* set USI to shift out 8 bits */ \
-	( 0x0 << USICNT0 ); \
+void SET_USI_TO_READ_DATA(void ) 
+{ 
+	/* set SDA as input */ 
+	DDR_USI &= ~( 1 << PORT_USI_SDA ); 
+	/* clear all interrupt flags, except Start Cond */
+	USISR    = 
+	( 0 << USISIF ) | ( 1 << USIOIF ) | ( 1 << USIPF ) | ( 1 << USIDC ) | ( 0x0 << USICNT0 ); 
+	/* set USI to shift out 8 bits */ 
+	
 }
 
 /********************************************************************************
@@ -111,23 +108,27 @@ static volatile uint8_t txCount;
 
 
 /********************************************************************************
-                                local functions
 ********************************************************************************/
 // flushes the TWI buffers
-static void flushTwiBuffers(void)
+void usiTwi_flushTxBuffers(void)
 {
-  rxTail = 0;  rxHead = 0;  rxCount = 0;
-  txTail = 0;  txHead = 0;  txCount = 0;
-} 
+   txTail = 0;  txHead = 0;  txCount = 0;
+}
+
+void usiTwi_flushRxBuffers(void)
+{
+	rxTail = 0;  rxHead = 0;  rxCount = 0;
+}
 
 /********************************************************************************
                                 public functions
 ********************************************************************************/
 // initialize USI for TWI slave mode
 
-void usiTwiSlave_init(uint8_t ownAddress)
+void usiTwi_Slave_init(uint8_t ownAddress)
 {
-  flushTwiBuffers( );//<---------------------???
+  usiTwi_flushTxBuffers();
+  usiTwi_flushRxBuffers();
 
   slaveAddress = ownAddress;
 
@@ -209,8 +210,6 @@ void usiTwi_Set_TxBuffer(void)
 	if(amount == 0){	return; }			//No data in buffer
 
 	call_set_TxBuffer(amount);
-
-	
 }
 
 
@@ -320,12 +319,16 @@ ISR( USI_OVERFLOW_VECTOR )
 		if ( USIDR & 0x01 )	//----------------->1=[Master read] 
         {
           ///////////////////////////////////////
-		  if( ! usiTwi_is_DataInTxBuffer() ){  usiTwi_Set_TxBuffer();  }		  
+		  if( ! usiTwi_is_DataInTxBuffer() ){  usiTwi_Set_TxBuffer();  }			  	  
 		  //////////////////////////////////////
           overflowState = USI_SLAVE_SEND_DATA; //Wait for send data~
 		  
         } else {	//-------------------------> 0=[Master write] 
-          overflowState = USI_SLAVE_REQUEST_DATA;
+          //////////////////////////////////////
+		  usiTwi_flushRxBuffers();
+		  //////////////////////////////////////
+		  overflowState = USI_SLAVE_REQUEST_DATA;
+		  
         }
         SET_USI_TO_SEND_ACK( ); //shift 1 bit
 		

@@ -25,6 +25,9 @@ Version    Date       Description
 #include <stdio.h>
 #include <stdbool.h>
 
+
+#define ENABLE_DEBUG	1
+
 //BIT OPERATOR==================================
 #define BIT_CHECK(var,pos)	((var)&(1<<(pos)))
 #define BIT_SET(var,pos)	((var)|=(1<<(pos)))
@@ -71,44 +74,44 @@ Version    Date       Description
 #define _Temperature 34	//b0100010
 //=======================================
 								// ----- // Test		
-#define MY_TIC_TIME	1953		//0.25sec// 0.24  
+#define MY_TIC_TIME		1953	//0.25sec// 0.24  
 //#define MY_TIC_TIME	3906	//0.50sec
 //#define MY_TIC_TIME	7812	//1.00sec
 #define TIC_FOR_1SEC	4
 
-#define MY_PWM_FREQ	240		//500Hz
+#define MY_PWM_FREQ		240		//500Hz
 #define INIT_PWM_DUTY	220
-#define MINIMUM_STEP	1
+#define MY_MINIMUM		1
 
 #define MY_ADDRESS		0x24
 
 
-#define BRT_H	235	//2.35A
-#define BRT_M	200	//2.00A
-#define BRT_L	165	//1.65A
-#define DIM_H	70	//0.70A
-#define DIM_M	60	//0.60A
-#define DIM_L	50	//0.50A
+#define BRT_H		0x12C8	//2.35A
+#define BRT_M		0x12C8	//2.00A
+#define BRT_L		0x12C8	//1.65A
+#define DIM_H		0x1264	//0.70A
+#define DIM_M		0x1264	//0.60A
+#define DIM_L		0x1264	//0.50A
 //---------Slope.up time = 6sec
-#define TIMEUP_H	8
-#define TIMEUP_M	7
-#define TIMEUP_L	6
+#define TIMEUP_H	0x4B
+#define TIMEUP_M	0x4B
+#define TIMEUP_L	0x4B
 //---------Slope.down time = 20sec At Hi state
-#define TIMEDOWN	20
+#define TIMEDOWN	0x32
 //---------Delay time = 120sec
-#define TIME_DELAY		120
+#define TIME_DELAY	0x0F
 
 //COMMAND==========================
-#define MCMD_GET_CONFIG 0x00
-#define MCMD_GET_NOWAMP 0x01
-#define MCMD_GET_NOWPIR 0x02
-#define MCMD_GET_NOWMOD 0x03
+#define GET_CONFIG	0//0x00
+#define GET_NOWAMP	1//0x01
+#define GET_NOWPIR	2//0x02
+#define GET_NOWMOD	3//0x03
 
-#define MCMD_SET_BRIGHT 0x14
-#define MCMD_SET_DIMM 	0x15
-#define MCMD_SET_TIMEUP 0x16
-#define MCMD_SET_TIMEDN 0x17
-#define MCMD_SET_DELAY	0x18
+#define SET_BRIGHT	17//0x11
+#define SET_DIMM	18//0x12
+#define SET_TIMEUP	19//0x13
+#define SET_TIMEDN	20//0x14
+#define SET_DELAY	21//0x15
 
 #define STATE_COMMAND	0x00
 #define STATE_DATA_1	0x01
