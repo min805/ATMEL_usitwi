@@ -12,9 +12,12 @@
 #include "myConfig.h"
 #include "myUsiTwiSlave.h"
 #include "myTimer.h"
+#include "myADC.h"
 
 uint8_t gWakeUpFlag;
 uint8_t gCountFlag;
+//bool gIncDecFlag;
+
 uint8_t ticCount;
 uint8_t secCount;
 
@@ -26,9 +29,16 @@ uint8_t cfg_TimeDn	  = TIMEDOWN;				//PWM value
 uint8_t cfg_TimeDelay = TIME_DELAY;				//SEC value
 
 bool nowPIR = true;
-uint8_t nowMODE = 0;
-uint16_t nowAMP = 0x1234;
+uint8_t nowMODE = 0; //For Debugging
+uint16_t nowAMP = 0;
 
+void debug_init(void);
+uint8_t mode_init(void);
+void counter_reset(void);
+bool counter_is_done(uint8_t times);
+
+uint16_t set_targetAMP(uint16_t targetI, uint8_t mode);
+void set_PWM(uint16_t targetI, uint8_t mode);
 /*************************************************
 ***************************************************/
 ISR(TIM1_COMPA_vect)
@@ -37,7 +47,7 @@ ISR(TIM1_COMPA_vect)
 	wdt_reset();
 	if(++ticCount >= TIC_FOR_1SEC){
 		ticCount = 0;
-		secCount++;
+		if(++secCount == 255) secCount = 0;	//secCount = 0~254
 	}
 	//------------------------------
 	//PORT_SW = PIN_SW^(1<<_TP);
@@ -52,6 +62,27 @@ void set_gWakeUpFlag_i2c(void)
 	BIT_SET(gWakeUpFlag,_BIT_I2C);
 }
 
+void set_gWakeUpFlag_adc(void)
+{
+	BIT_SET(gWakeUpFlag,_BIT_ADC);
+}
+
+//void set_gIncDecFlag(bool tf)
+//{
+//	gIncDecFlag = tf;
+//}
+//bool is_gIncDecFlag(void)
+//{
+//	return gIncDecFlag;
+//}
+/*************************************************
+callback function for update nowAMP
+***************************************************/
+void call_set_nowAMP(uint16_t adcValue)
+{
+	nowAMP = adcValue;
+	set_gWakeUpFlag_adc();	
+}
 
 /*************************************************
 callback function for build txBufffer
@@ -150,6 +181,7 @@ void call_set_TxBuffer(uint8_t amount)
 } //
 
 /*************************************************
+	Local method
 ***************************************************/
 void debug_init(void)
 {
@@ -157,7 +189,8 @@ void debug_init(void)
 	DDR_SW |= (1<<_TP);		//0=input, 1=output(Save energy)
 }
 
-uint8_t getSwitch(void)
+/*************************************************/
+uint8_t mode_init(void)
 {
 	uint8_t retValue = 0;
 	//pull up, input
@@ -168,34 +201,114 @@ uint8_t getSwitch(void)
 	
 	if(PINB & (1<<_SW0)){ retValue |= 0x01;}
 	if(PINB & (1<<_SW1)){ retValue |= 0x02;}
-	//if(retValue > 0x03) retValue = 0;	
+	if(retValue > 0x03) retValue = 0;	
+	
 	if (retValue == 0x03){
 		cfg_TimeDelay = MY_MINIMUM;	//1.0sec 
-	}
-	
+	}	
 	return retValue;
 }
+
+/*************************************************/
+//void counter_start(void)
+//{
+//	secCount = 0;
+//	BIT_SET(gCountFlag,_BIT_COUNT_ON);
+//	BIT_CLEAR(gCountFlag,_BIT_COUNT_DONE);
+//}
+void counter_reset(void)
+{
+	secCount = 0;
+	BIT_CLEAR(gCountFlag,_BIT_COUNT_ON);
+	BIT_CLEAR(gCountFlag,_BIT_COUNT_DONE);
+}
+bool counter_is_done(uint8_t times)
+{
+	bool retValue = false;
+	if(BIT_CHECK(gCountFlag,_BIT_COUNT_ON)){
+		if(BIT_CHECK(gCountFlag,_BIT_COUNT_DONE)){
+			return true;
+		}
+		if(secCount >= times){
+			BIT_SET(gCountFlag,_BIT_COUNT_DONE);
+			retValue = true;
+		}
+	}else{
+		//Start the counter
+		secCount = 0;
+		BIT_SET(gCountFlag,_BIT_COUNT_ON);
+		BIT_CLEAR(gCountFlag,_BIT_COUNT_DONE);
+	}
+	return retValue;
+}
+
+/*************************************************/
+uint16_t set_targetAMP(uint16_t targetI, uint8_t mode)
+{
+	uint16_t retAMP = targetI;
+	nowPIR = adc_io_read(_InSensor);
+	if(nowPIR){	//Got Object
+		retAMP = cfg_Bright[mode];
+		counter_reset();
+	}else{
+		if(counter_is_done(cfg_TimeDelay)){
+			retAMP = cfg_Dimm[mode];
+		}
+	}	
+	return retAMP;
+} 
+
+/*************************************************/
+void set_PWM(uint16_t targetI, uint8_t mode)
+{
+	uint8_t step;
+	if(nowAMP > targetI){
+		//going down
+		if((nowAMP-targetI)>cfg_TimeDn){step = cfg_TimeDn;
+		}else{			step = MY_MINIMUM;		}
+		pwm_write(false,step);	
+	}else if(nowAMP < targetI){
+		//going up
+		if((targetI-nowAMP)>cfg_TimeUp[mode]){step = cfg_TimeUp[mode];
+		}else{			step = MY_MINIMUM;		}
+		pwm_write(true,step);		
+	}
+}
+
+/*************************************************
+***************************************************/
 int main(void)
 {   
+	uint16_t targetAMP;
+	
 	debug_init(); 
 	timer_init(MY_TIC_TIME);
-	usiTwi_Slave_init(MY_ADDRESS);
-	
+	usiTwi_Slave_init(MY_ADDRESS);	
+	pwm_init(_OutPWM);
+	adc_init();
+	adc_io_init(_InSensor);
+
 	set_sleep_mode(SLEEP_MODE_IDLE);
 	wdt_enable(WDTO_8S);
-	
-	nowMODE = getSwitch();
 
-	uint16_t targetAMP = cfg_Bright[nowMODE];
+	adc_start(_InCurrent);	
+	nowMODE = mode_init();
+	targetAMP = cfg_Bright[nowMODE];
+	sei();
 	while(1)
     {
 		if(BIT_CHECK(gWakeUpFlag,_BIT_I2C))	{
 			BIT_CLEAR(gWakeUpFlag,_BIT_I2C);
 			usiTwi_is_Stop();
 		}
+		if(BIT_CHECK(gWakeUpFlag,_BIT_ADC))	{
+			BIT_CLEAR(gWakeUpFlag,_BIT_ADC);
+			targetAMP = set_targetAMP(targetAMP,nowMODE);
+			set_PWM(targetAMP,nowMODE);
+		}		
 		if(BIT_CHECK(gWakeUpFlag,_BIT_TIC))	{
 			BIT_CLEAR(gWakeUpFlag,_BIT_TIC);
-			//main work here!
+			adc_start(_InCurrent);			
 		}
 		/* */
 		while( !gWakeUpFlag ) {
@@ -207,7 +320,7 @@ int main(void)
 		}
 		/* */
 		//------------------------------
-		//PORT_SW = PIN_SW^(1<<_TP);
+		PORT_SW = PIN_SW^(1<<_TP);
 		//------------------------------		
     }
 }

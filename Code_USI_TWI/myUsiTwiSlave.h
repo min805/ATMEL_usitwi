@@ -45,12 +45,19 @@
 #  error TWI TX buffer size is not a power of 2
 #endif
 
-
-void SET_USI_TO_SEND_ACK(void );
-void SET_USI_TO_READ_ACK(void );
-void SET_USI_TO_START_CONDITION_MODE(void ); 
-void SET_USI_TO_SEND_DATA(void ); 
-void SET_USI_TO_READ_DATA(void ); 
+/********************************************************************************
+                                   typedef
+********************************************************************************/
+typedef enum
+{
+	USI_SLAVE_CHECK_ADDRESS               = 0x00,
+	USI_SLAVE_SEND_DATA                   = 0x01,
+	USI_SLAVE_1ST_CHECK_REPLY_SEND_DATA   = 0x02,
+	USI_SLAVE_CHECK_REPLY_SEND_DATA		= 0x03,
+	USI_SLAVE_REQUEST_DATA                = 0x04,
+	USI_SLAVE_GET_DATA_AND_SEND_ACK       = 0x05
+} overflowState_t;
+ 
 
 
 void usiTwi_flushTxBuffers(void);

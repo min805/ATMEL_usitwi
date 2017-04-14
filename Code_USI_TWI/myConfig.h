@@ -36,10 +36,9 @@ Version    Date       Description
 #define _BIT_TIC			0
 #define _BIT_I2C			1
 #define _BIT_ADC			2
-//#define _BIT_REPORT		3
 
-#define _BIT_COUNT_ON		1
-#define _BIT_COUNT_DONE		2
+#define _BIT_COUNT_ON		0
+#define _BIT_COUNT_DONE		1
 
 //PORTB=================================
 #define PORT_SW		PORTB
@@ -58,9 +57,7 @@ Version    Date       Description
 //#define PORT_USI	PORTA	//For LCD
 //#define PIN_USI		PINA
 //#define DDR_USI		DDRA
-#define PORT_PWM	PORTA
-#define PIN_PWM		PINA
-#define DDR_PWM		DDRA
+
 
 
 #define _InVoltgae	1	//pin12, PORTA1
@@ -74,13 +71,13 @@ Version    Date       Description
 #define _Temperature 34	//b0100010
 //=======================================
 								// ----- // Test		
-#define MY_TIC_TIME		1953	//0.25sec// 0.24  
-//#define MY_TIC_TIME	3906	//0.50sec
+//#define MY_TIC_TIME	1953	//0.25sec// 0.24  
+#define MY_TIC_TIME		3906	//0.50sec
 //#define MY_TIC_TIME	7812	//1.00sec
 #define TIC_FOR_1SEC	4
 
 #define MY_PWM_FREQ		240		//500Hz
-#define INIT_PWM_DUTY	220
+#define INIT_PWM_DUTY	240
 #define MY_MINIMUM		1
 
 #define MY_ADDRESS		0x24
@@ -118,7 +115,9 @@ Version    Date       Description
 #define STATE_DATA_2	0x02
 
 void call_set_TxBuffer(uint8_t amount);
+void call_set_nowAMP(uint16_t adcValue);
 void set_gWakeUpFlag_i2c(void);
-
-
+void set_gWakeUpFlag_adc(void);
+//void set_gIncDecFlag(bool tf);
+//bool is_gIncDecFlag(void);
 #endif /* MYCONFIG_H_ */

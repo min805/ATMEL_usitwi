@@ -4,6 +4,8 @@
 
 main.c
 
+myADC.c
+
 myTimer.c
 
 myUsiTwiSlave.c

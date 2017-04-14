@@ -8,6 +8,37 @@
 #include "myConfig.h"
 #include "myUsiTwiSlave.h"
 
+
+
+
+
+
+/********************************************************************************
+                                local variables
+********************************************************************************/
+static volatile overflowState_t overflowState;
+static uint8_t          slaveAddress;
+
+static uint8_t          rxBuf[ TWI_RX_BUFFER_SIZE ];
+static volatile uint8_t rxHead;
+static volatile uint8_t rxTail;
+static volatile uint8_t rxCount;
+
+static uint8_t          txBuf[ TWI_TX_BUFFER_SIZE ];
+static volatile uint8_t txHead;
+static volatile uint8_t txTail;
+static volatile uint8_t txCount;
+
+
+
+void SET_USI_TO_SEND_ACK(void );
+void SET_USI_TO_READ_ACK(void );
+void SET_USI_TO_START_CONDITION_MODE(void );
+void SET_USI_TO_SEND_DATA(void );
+void SET_USI_TO_READ_DATA(void );
+
+
+
 /********************************************************************************
                         functions implemented as macros
 ********************************************************************************/
@@ -75,39 +106,10 @@ void SET_USI_TO_READ_DATA(void )
 	
 }
 
-/********************************************************************************
-                                   typedef
-********************************************************************************/
-typedef enum
-{
-  USI_SLAVE_CHECK_ADDRESS               = 0x00,
-  USI_SLAVE_SEND_DATA                   = 0x01,
-  USI_SLAVE_1ST_CHECK_REPLY_SEND_DATA   = 0x02,
-  USI_SLAVE_CHECK_REPLY_SEND_DATA		= 0x03,
-  USI_SLAVE_REQUEST_DATA                = 0x04,
-  USI_SLAVE_GET_DATA_AND_SEND_ACK       = 0x05
-} overflowState_t;
-static volatile overflowState_t overflowState;
 
 
 /********************************************************************************
-                                local variables
-********************************************************************************/
-static uint8_t          slaveAddress;
-
-static uint8_t          rxBuf[ TWI_RX_BUFFER_SIZE ];
-static volatile uint8_t rxHead;
-static volatile uint8_t rxTail;
-static volatile uint8_t rxCount;
-
-static uint8_t          txBuf[ TWI_TX_BUFFER_SIZE ];
-static volatile uint8_t txHead;
-static volatile uint8_t txTail;
-static volatile uint8_t txCount;
-
-
-
-/********************************************************************************
+                                public functions
 ********************************************************************************/
 // flushes the TWI buffers
 void usiTwi_flushTxBuffers(void)
@@ -121,7 +123,6 @@ void usiTwi_flushRxBuffers(void)
 }
 
 /********************************************************************************
-                                public functions
 ********************************************************************************/
 // initialize USI for TWI slave mode
 
