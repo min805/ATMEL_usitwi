@@ -44,9 +44,8 @@ void timer_init(uint16_t tic_time)
 		///Timer1 mode = CTC with OCR1A(WGM = 0b0100)
 		///No port out	
 	TCCR1A = 0;
-	TCCR1B = 0x0D;
-		///0x0D->Clock On
-		///(1<<WGM12)|(1<<CS12)|(1<<CS10)
+	TCCR1B = (1<<WGM12)|(1<<CS12)|(1<<CS10);
+		///0x0D->Clock On, divide by 1024		
 		///0x08->Clock STOP!
 		///(1<<WGM12)
 	TCCR1C = 0;	

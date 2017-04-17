@@ -15,9 +15,10 @@ ISR(ADC_vect)
 	static uint16_t adcValue = 0;
 	adcValue += ADCW;				//ADCW = ADCL+ADCH
 	if(++adcCount >= ADCDIVIDE){
-		adcCount = 0;
-		call_set_nowAMP(adcValue/ADCDIVIDE);
-		ADCSRA &= ~( (1<<ADATE)|(1<<ADEN)|(1<<ADSC) );//ADC Disable			
+		adcCount = 0;		
+		ADCSRA &= ~( (1<<ADATE)|(1<<ADEN)|(1<<ADSC) );//ADC Disable	
+		call_set_nowAMP(adcValue/ADCDIVIDE);	
+		adcValue = 0;	
 	}
 }
 

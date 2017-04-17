@@ -3,6 +3,17 @@
  *
  * Created: 4/10/2017 1:28:40 PM
  *  Author: min
+ 
+ - Request spec-------------------------------------------------------
+ -	2.35A going to 0.700A
+ -	2.00A going to 0.600A
+ -	1.65A going to 0.500A
+ -
+ -	6 sec +/-2 sec rise time
+ -	20 sec +/- 5 sec falling time (2.35A only)  others on same slope
+ -
+ -	Delay 120 sec +/-10sec
+
  */ 
 /********************************************************************************
 Change Activity:
@@ -34,11 +45,13 @@ Version    Date       Description
 #define BIT_CLEAR(var,pos)	((var)&=~(1<<(pos)))
 //----flagWakeup----------
 #define _BIT_TIC			0
-#define _BIT_I2C			1
-#define _BIT_ADC			2
+#define _BIT_SEC			1
+#define _BIT_I2C			2
+#define _BIT_ADC			3
 
 #define _BIT_COUNT_ON		0
 #define _BIT_COUNT_DONE		1
+#define _BIT_SLOPE_ON		2
 
 //PORTB=================================
 #define PORT_SW		PORTB
@@ -70,11 +83,15 @@ Version    Date       Description
 #define _OutPWM		7	//pin6,  PORTA7
 #define _Temperature 34	//b0100010
 //=======================================
-								// ----- // Test		
+								// ----- // Test	
+#define MY_TIC_TIME		781		
+#define TIC_FOR_1SEC	10							
 //#define MY_TIC_TIME	1953	//0.25sec// 0.24  
-#define MY_TIC_TIME		3906	//0.50sec
+//#define TIC_FOR_1SEC	4
+//#define MY_TIC_TIME	3906	//0.50sec
 //#define MY_TIC_TIME	7812	//1.00sec
-#define TIC_FOR_1SEC	4
+
+
 
 #define MY_PWM_FREQ		240		//500Hz
 #define INIT_PWM_DUTY	240
@@ -118,6 +135,5 @@ void call_set_TxBuffer(uint8_t amount);
 void call_set_nowAMP(uint16_t adcValue);
 void set_gWakeUpFlag_i2c(void);
 void set_gWakeUpFlag_adc(void);
-//void set_gIncDecFlag(bool tf);
-//bool is_gIncDecFlag(void);
+
 #endif /* MYCONFIG_H_ */

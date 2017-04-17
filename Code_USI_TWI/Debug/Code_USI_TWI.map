@@ -22,6 +22,8 @@ Discarded input sections
  .text          0x00000000        0x0 main.o
  .data          0x00000000        0x0 main.o
  .bss           0x00000000        0x0 main.o
+ .text.set_gWakeUpFlag_adc
+                0x00000000        0xc main.o
  .text          0x00000000        0x0 myADC.o
  .data          0x00000000        0x0 myADC.o
  .bss           0x00000000        0x0 myADC.o
@@ -204,7 +206,7 @@ END GROUP
 .rela.plt
  *(.rela.plt)
 
-.text           0x00000000      0x816
+.text           0x00000000      0x85c
  *(.vectors)
  .vectors       0x00000000       0x22 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1061/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/../../../../avr/lib/avr25/crttn44a.o
                 0x00000000                __vector_default
@@ -276,113 +278,110 @@ END GROUP
                 0x0000005a                . = ALIGN (0x2)
  *(.text.*)
  .text.__vector_6
-                0x0000005a       0x4c main.o
+                0x0000005a       0x62 main.o
                 0x0000005a                __vector_6
  .text.set_gWakeUpFlag_i2c
-                0x000000a6        0xc main.o
-                0x000000a6                set_gWakeUpFlag_i2c
- .text.set_gWakeUpFlag_adc
-                0x000000b2        0xc main.o
-                0x000000b2                set_gWakeUpFlag_adc
+                0x000000bc        0xc main.o
+                0x000000bc                set_gWakeUpFlag_i2c
  .text.call_set_nowAMP
-                0x000000be        0xc main.o
-                0x000000be                call_set_nowAMP
+                0x000000c8       0x14 main.o
+                0x000000c8                call_set_nowAMP
  .text.call_set_TxBuffer
-                0x000000ca      0x1b2 main.o
-                0x000000ca                call_set_TxBuffer
+                0x000000dc      0x1c0 main.o
+                0x000000dc                call_set_TxBuffer
  .text.debug_init
-                0x0000027c        0x6 main.o
-                0x0000027c                debug_init
+                0x0000029c        0x6 main.o
+                0x0000029c                debug_init
  .text.mode_init
-                0x00000282       0x20 main.o
-                0x00000282                mode_init
+                0x000002a2       0x20 main.o
+                0x000002a2                mode_init
  .text.counter_reset
-                0x000002a2       0x10 main.o
-                0x000002a2                counter_reset
+                0x000002c2       0x10 main.o
+                0x000002c2                counter_reset
  .text.counter_is_done
-                0x000002b2       0x36 main.o
-                0x000002b2                counter_is_done
+                0x000002d2       0x36 main.o
+                0x000002d2                counter_is_done
  .text.set_targetAMP
-                0x000002e8       0x4e main.o
-                0x000002e8                set_targetAMP
- .text.set_PWM  0x00000336       0x4e main.o
-                0x00000336                set_PWM
- .text.main     0x00000384       0xb6 main.o
-                0x00000384                main
+                0x00000308       0x4e main.o
+                0x00000308                set_targetAMP
+ .text.set_PWM  0x00000356       0x62 main.o
+                0x00000356                set_PWM
+ .text.main     0x000003b8       0xc8 main.o
+                0x000003b8                main
  .text.__vector_13
-                0x0000043a       0x84 myADC.o
-                0x0000043a                __vector_13
+                0x00000480       0x84 myADC.o
+                0x00000480                __vector_13
  .text.adc_init
-                0x000004be        0xa myADC.o
-                0x000004be                adc_init
+                0x00000504        0xa myADC.o
+                0x00000504                adc_init
  .text.adc_start
-                0x000004c8       0x12 myADC.o
-                0x000004c8                adc_start
+                0x0000050e       0x12 myADC.o
+                0x0000050e                adc_start
  .text.adc_io_init
-                0x000004da       0x1e myADC.o
-                0x000004da                adc_io_init
+                0x00000520       0x1e myADC.o
+                0x00000520                adc_io_init
  .text.adc_io_read
-                0x000004f8        0xe myADC.o
-                0x000004f8                adc_io_read
+                0x0000053e        0xe myADC.o
+                0x0000053e                adc_io_read
  .text.__vector_11
-                0x00000506       0x4a myTimer.o
-                0x00000506                __vector_11
+                0x0000054c       0x4a myTimer.o
+                0x0000054c                __vector_11
  .text.timer_init
-                0x00000550       0x16 myTimer.o
-                0x00000550                timer_init
+                0x00000596       0x16 myTimer.o
+                0x00000596                timer_init
  .text.pwm_init
-                0x00000566       0x2c myTimer.o
-                0x00000566                pwm_init
+                0x000005ac       0x2c myTimer.o
+                0x000005ac                pwm_init
  .text.pwm_write
-                0x00000592       0x40 myTimer.o
-                0x00000592                pwm_write
+                0x000005d8       0x40 myTimer.o
+                0x000005d8                pwm_write
  .text.SET_USI_TO_SEND_ACK
-                0x000005d2        0xa myUsiTwiSlave.o
-                0x000005d2                SET_USI_TO_SEND_ACK
+                0x00000618        0xa myUsiTwiSlave.o
+                0x00000618                SET_USI_TO_SEND_ACK
  .text.SET_USI_TO_READ_ACK
-                0x000005dc        0xa myUsiTwiSlave.o
-                0x000005dc                SET_USI_TO_READ_ACK
+                0x00000622        0xa myUsiTwiSlave.o
+                0x00000622                SET_USI_TO_READ_ACK
  .text.SET_USI_TO_START_CONDITION_MODE
-                0x000005e6        0xa myUsiTwiSlave.o
-                0x000005e6                SET_USI_TO_START_CONDITION_MODE
+                0x0000062c        0xa myUsiTwiSlave.o
+                0x0000062c                SET_USI_TO_START_CONDITION_MODE
  .text.SET_USI_TO_SEND_DATA
-                0x000005f0        0x8 myUsiTwiSlave.o
-                0x000005f0                SET_USI_TO_SEND_DATA
+                0x00000636        0x8 myUsiTwiSlave.o
+                0x00000636                SET_USI_TO_SEND_DATA
  .text.SET_USI_TO_READ_DATA
-                0x000005f8        0x8 myUsiTwiSlave.o
-                0x000005f8                SET_USI_TO_READ_DATA
+                0x0000063e        0x8 myUsiTwiSlave.o
+                0x0000063e                SET_USI_TO_READ_DATA
  .text.usiTwi_flushTxBuffers
-                0x00000600        0xe myUsiTwiSlave.o
-                0x00000600                usiTwi_flushTxBuffers
+                0x00000646        0xe myUsiTwiSlave.o
+                0x00000646                usiTwi_flushTxBuffers
  .text.usiTwi_flushRxBuffers
-                0x0000060e        0xe myUsiTwiSlave.o
-                0x0000060e                usiTwi_flushRxBuffers
+                0x00000654        0xe myUsiTwiSlave.o
+                0x00000654                usiTwi_flushRxBuffers
  .text.usiTwi_Slave_init
-                0x0000061c       0x24 myUsiTwiSlave.o
-                0x0000061c                usiTwi_Slave_init
+                0x00000662       0x24 myUsiTwiSlave.o
+                0x00000662                usiTwi_Slave_init
  .text.usiTwi_ByteToTxBuffer
-                0x00000640       0x2c myUsiTwiSlave.o
-                0x00000640                usiTwi_ByteToTxBuffer
+                0x00000686       0x2c myUsiTwiSlave.o
+                0x00000686                usiTwi_ByteToTxBuffer
  .text.usiTwi_ByteFromRxBuffer
-                0x0000066c       0x2c myUsiTwiSlave.o
-                0x0000066c                usiTwi_ByteFromRxBuffer
+                0x000006b2       0x2c myUsiTwiSlave.o
+                0x000006b2                usiTwi_ByteFromRxBuffer
  .text.usiTwi_Set_TxBuffer
-                0x00000698        0xa myUsiTwiSlave.o
-                0x00000698                usiTwi_Set_TxBuffer
+                0x000006de        0xa myUsiTwiSlave.o
+                0x000006de                usiTwi_Set_TxBuffer
  .text.usiTwi_is_Stop
-                0x000006a2        0x6 myUsiTwiSlave.o
-                0x000006a2                usiTwi_is_Stop
+                0x000006e8        0x6 myUsiTwiSlave.o
+                0x000006e8                usiTwi_is_Stop
  .text.__vector_15
-                0x000006a8       0x38 myUsiTwiSlave.o
-                0x000006a8                __vector_15
+                0x000006ee       0x38 myUsiTwiSlave.o
+                0x000006ee                __vector_15
  .text.__vector_16
-                0x000006e0      0x132 myUsiTwiSlave.o
-                0x000006e0                __vector_16
-                0x00000812                . = ALIGN (0x2)
+                0x00000726      0x132 myUsiTwiSlave.o
+                0x00000726                __vector_16
+                0x00000858                . = ALIGN (0x2)
  *(.fini9)
- .fini9         0x00000812        0x0 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1061/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr25\libgcc.a(_exit.o)
-                0x00000812                _exit
-                0x00000812                exit
+ .fini9         0x00000858        0x0 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1061/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr25\libgcc.a(_exit.o)
+                0x00000858                _exit
+                0x00000858                exit
  *(.fini9)
  *(.fini8)
  *(.fini8)
@@ -401,11 +400,11 @@ END GROUP
  *(.fini1)
  *(.fini1)
  *(.fini0)
- .fini0         0x00000812        0x4 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1061/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr25\libgcc.a(_exit.o)
+ .fini0         0x00000858        0x4 c:/program files (x86)/atmel/atmel toolchain/avr8 gcc/native/3.4.1061/avr8-gnu-toolchain/bin/../lib/gcc/avr/4.8.1/avr25\libgcc.a(_exit.o)
  *(.fini0)
-                0x00000816                _etext = .
+                0x0000085c                _etext = .
 
-.data           0x00800060       0x18 load address 0x00000816
+.data           0x00800060       0x18 load address 0x0000085c
                 0x00800060                PROVIDE (__data_start, .)
  *(.data)
  *(.data*)
@@ -471,8 +470,8 @@ END GROUP
                 0x008000ac                secCount
                 0x008000ad                gCountFlag
                 0x008000ae                PROVIDE (__bss_end, .)
-                0x00000816                __data_load_start = LOADADDR (.data)
-                0x0000082e                __data_load_end = (__data_load_start + SIZEOF (.data))
+                0x0000085c                __data_load_start = LOADADDR (.data)
+                0x00000874                __data_load_end = (__data_load_start + SIZEOF (.data))
 
 .noinit         0x008000ae        0x0
                 0x008000ae                PROVIDE (__noinit_start, .)
@@ -555,51 +554,51 @@ END GROUP
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000      0xe25
+.debug_info     0x00000000      0xe3f
  *(.debug_info .gnu.linkonce.wi.*)
- .debug_info    0x00000000      0x65f main.o
- .debug_info    0x0000065f      0x24c myADC.o
- .debug_info    0x000008ab      0x169 myTimer.o
- .debug_info    0x00000a14      0x411 myUsiTwiSlave.o
+ .debug_info    0x00000000      0x679 main.o
+ .debug_info    0x00000679      0x24c myADC.o
+ .debug_info    0x000008c5      0x169 myTimer.o
+ .debug_info    0x00000a2e      0x411 myUsiTwiSlave.o
 
-.debug_abbrev   0x00000000      0x5f5
+.debug_abbrev   0x00000000      0x5cc
  *(.debug_abbrev)
- .debug_abbrev  0x00000000      0x20a main.o
- .debug_abbrev  0x0000020a      0x16f myADC.o
- .debug_abbrev  0x00000379       0xd8 myTimer.o
- .debug_abbrev  0x00000451      0x1a4 myUsiTwiSlave.o
+ .debug_abbrev  0x00000000      0x1e1 main.o
+ .debug_abbrev  0x000001e1      0x16f myADC.o
+ .debug_abbrev  0x00000350       0xd8 myTimer.o
+ .debug_abbrev  0x00000428      0x1a4 myUsiTwiSlave.o
 
-.debug_line     0x00000000      0x734
+.debug_line     0x00000000      0x740
  *(.debug_line .debug_line.* .debug_line_end)
- .debug_line    0x00000000      0x237 main.o
- .debug_line    0x00000237      0x1a5 myADC.o
- .debug_line    0x000003dc      0x102 myTimer.o
- .debug_line    0x000004de      0x256 myUsiTwiSlave.o
+ .debug_line    0x00000000      0x243 main.o
+ .debug_line    0x00000243      0x1a5 myADC.o
+ .debug_line    0x000003e8      0x102 myTimer.o
+ .debug_line    0x000004ea      0x256 myUsiTwiSlave.o
 
-.debug_frame    0x00000000      0x3f0
+.debug_frame    0x00000000      0x3f4
  *(.debug_frame)
- .debug_frame   0x00000000      0x124 main.o
- .debug_frame   0x00000124       0xbc myADC.o
- .debug_frame   0x000001e0       0x9c myTimer.o
- .debug_frame   0x0000027c      0x174 myUsiTwiSlave.o
+ .debug_frame   0x00000000      0x128 main.o
+ .debug_frame   0x00000128       0xbc myADC.o
+ .debug_frame   0x000001e4       0x9c myTimer.o
+ .debug_frame   0x00000280      0x174 myUsiTwiSlave.o
 
 .debug_str      0x00000000      0x613
  *(.debug_str)
- .debug_str     0x00000000      0x328 main.o
-                                0x377 (size before relaxing)
- .debug_str     0x00000328       0x81 myADC.o
+ .debug_str     0x00000000      0x33e main.o
+                                0x38d (size before relaxing)
+ .debug_str     0x0000033e       0x81 myADC.o
                                 0x222 (size before relaxing)
- .debug_str     0x000003a9       0x34 myTimer.o
+ .debug_str     0x000003bf       0x34 myTimer.o
                                 0x1bd (size before relaxing)
- .debug_str     0x000003dd      0x236 myUsiTwiSlave.o
+ .debug_str     0x000003f3      0x220 myUsiTwiSlave.o
                                 0x400 (size before relaxing)
 
-.debug_loc      0x00000000      0x963
+.debug_loc      0x00000000      0x8ca
  *(.debug_loc)
- .debug_loc     0x00000000      0x470 main.o
- .debug_loc     0x00000470      0x1db myADC.o
- .debug_loc     0x0000064b      0x1a4 myTimer.o
- .debug_loc     0x000007ef      0x174 myUsiTwiSlave.o
+ .debug_loc     0x00000000      0x3d7 main.o
+ .debug_loc     0x000003d7      0x1db myADC.o
+ .debug_loc     0x000005b2      0x1a4 myTimer.o
+ .debug_loc     0x00000756      0x174 myUsiTwiSlave.o
 
 .debug_macinfo
  *(.debug_macinfo)

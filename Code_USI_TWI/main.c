@@ -14,13 +14,11 @@
 #include "myTimer.h"
 #include "myADC.h"
 
+
 uint8_t gWakeUpFlag;
 uint8_t gCountFlag;
-//bool gIncDecFlag;
-
 uint8_t ticCount;
 uint8_t secCount;
-
 //...................... 
 uint16_t cfg_Bright[4]={BRT_H,BRT_M,BRT_L,BRT_H};	//ADC value
 uint16_t cfg_Dimm[4]  ={DIM_H,DIM_M,DIM_L,DIM_H};	//ADC value
@@ -36,16 +34,21 @@ void debug_init(void);
 uint8_t mode_init(void);
 void counter_reset(void);
 bool counter_is_done(uint8_t times);
-
 uint16_t set_targetAMP(uint16_t targetI, uint8_t mode);
 void set_PWM(uint16_t targetI, uint8_t mode);
+
+
 /*************************************************
 ***************************************************/
 ISR(TIM1_COMPA_vect)
 {
-	BIT_SET(gWakeUpFlag,_BIT_TIC);
 	wdt_reset();
+	if(BIT_CHECK(gCountFlag,_BIT_SLOPE_ON)){
+		BIT_CLEAR(gCountFlag,_BIT_SLOPE_ON);
+		BIT_SET(gWakeUpFlag,_BIT_TIC);
+	}		
 	if(++ticCount >= TIC_FOR_1SEC){
+		BIT_SET(gWakeUpFlag,_BIT_SEC);
 		ticCount = 0;
 		if(++secCount == 255) secCount = 0;	//secCount = 0~254
 	}
@@ -67,21 +70,14 @@ void set_gWakeUpFlag_adc(void)
 	BIT_SET(gWakeUpFlag,_BIT_ADC);
 }
 
-//void set_gIncDecFlag(bool tf)
-//{
-//	gIncDecFlag = tf;
-//}
-//bool is_gIncDecFlag(void)
-//{
-//	return gIncDecFlag;
-//}
 /*************************************************
 callback function for update nowAMP
 ***************************************************/
 void call_set_nowAMP(uint16_t adcValue)
 {
 	nowAMP = adcValue;
-	set_gWakeUpFlag_adc();	
+	//set_gWakeUpFlag_adc();	
+	BIT_SET(gWakeUpFlag,_BIT_ADC);
 }
 
 /*************************************************
@@ -93,35 +89,31 @@ void call_set_TxBuffer(uint8_t amount)
 	static uint8_t state = STATE_COMMAND;
 	static uint8_t command;
 	static uint16_t data_h;
-
-
+	
+	cli();
 	for(i=0; i < amount; i++)
 	{
 		data = usiTwi_ByteFromRxBuffer();
 		if(state == STATE_COMMAND){
-			//usiTwi_flushTxBuffers();
+			//-------------------------------
+			usiTwi_flushTxBuffers();
+			//-------------------------------
 			command = data;
 			switch(command)
 			{
 			case GET_CONFIG:	
 				usiTwi_ByteToTxBuffer((uint8_t)((cfg_Bright[nowMODE]>>8)&0x00FF) );	
-				usiTwi_ByteToTxBuffer((uint8_t)(cfg_Bright[nowMODE]&0x00FF) );
-						
+				usiTwi_ByteToTxBuffer((uint8_t)(cfg_Bright[nowMODE]&0x00FF) );						
 				usiTwi_ByteToTxBuffer((uint8_t)((cfg_Dimm[nowMODE]>>8)&0x00FF) );
-				usiTwi_ByteToTxBuffer((uint8_t)(cfg_Dimm[nowMODE]&0x00FF) );
-												
+				usiTwi_ByteToTxBuffer((uint8_t)(cfg_Dimm[nowMODE]&0x00FF) );												
 				usiTwi_ByteToTxBuffer(cfg_TimeUp[nowMODE]);
-				usiTwi_ByteToTxBuffer(cfg_TimeDn);
-				
+				usiTwi_ByteToTxBuffer(cfg_TimeDn);				
 				usiTwi_ByteToTxBuffer(cfg_TimeDelay);
-
 				state = STATE_COMMAND;
 			break;
-			case GET_NOWAMP:
+			case GET_NOWAMP:				
 				usiTwi_ByteToTxBuffer((uint8_t)((nowAMP>>8)&0x00FF));
-				usiTwi_ByteToTxBuffer((uint8_t)(nowAMP&0x00FF));
-				
-				
+				usiTwi_ByteToTxBuffer((uint8_t)(nowAMP&0x00FF));				
 				state = STATE_COMMAND;
 			break;
 			case GET_NOWPIR:				
@@ -130,14 +122,12 @@ void call_set_TxBuffer(uint8_t amount)
 					usiTwi_ByteToTxBuffer(0x01);
 				}else{
 					usiTwi_ByteToTxBuffer(0x00);
-				}
-				
+				}				
 				state = STATE_COMMAND;
 			break;
 			case GET_NOWMOD:				
 				usiTwi_ByteToTxBuffer(0);
-				usiTwi_ByteToTxBuffer(nowMODE);
-				
+				usiTwi_ByteToTxBuffer(nowMODE);				
 				state = STATE_COMMAND;
 			break;
 			case SET_BRIGHT:
@@ -178,6 +168,7 @@ void call_set_TxBuffer(uint8_t amount)
 			state = STATE_COMMAND;
 		} //end if
 	} //end for
+	sei();	
 } //
 
 /*************************************************
@@ -201,11 +192,12 @@ uint8_t mode_init(void)
 	
 	if(PINB & (1<<_SW0)){ retValue |= 0x01;}
 	if(PINB & (1<<_SW1)){ retValue |= 0x02;}
-	if(retValue > 0x03) retValue = 0;	
 	
 	if (retValue == 0x03){
 		cfg_TimeDelay = MY_MINIMUM;	//1.0sec 
-	}	
+	}else if(retValue > 0x03){
+		 retValue = 0;
+	}
 	return retValue;
 }
 
@@ -262,17 +254,23 @@ uint16_t set_targetAMP(uint16_t targetI, uint8_t mode)
 void set_PWM(uint16_t targetI, uint8_t mode)
 {
 	uint8_t step;
+	
 	if(nowAMP > targetI){
-		//going down
+	//-Current going down -> PWM up!
 		if((nowAMP-targetI)>cfg_TimeDn){step = cfg_TimeDn;
 		}else{			step = MY_MINIMUM;		}
-		pwm_write(false,step);	
+		BIT_SET(gCountFlag,_BIT_SLOPE_ON);	
+		pwm_write(true,step);//pwm_write(false,step);	
 	}else if(nowAMP < targetI){
-		//going up
+	//-Current going up -> PWM down!
 		if((targetI-nowAMP)>cfg_TimeUp[mode]){step = cfg_TimeUp[mode];
 		}else{			step = MY_MINIMUM;		}
-		pwm_write(true,step);		
+		BIT_SET(gCountFlag,_BIT_SLOPE_ON);
+		pwm_write(false,step);//pwm_write(true,step);		
 	}
+	//else{
+	//	BIT_CLEAR(gCountFlag,_BIT_SLOPE_ON);
+	//}
 }
 
 /*************************************************
@@ -305,7 +303,15 @@ int main(void)
 			BIT_CLEAR(gWakeUpFlag,_BIT_ADC);
 			targetAMP = set_targetAMP(targetAMP,nowMODE);
 			set_PWM(targetAMP,nowMODE);
-		}		
+		}
+		if(BIT_CHECK(gWakeUpFlag,_BIT_SEC))	{
+			BIT_CLEAR(gWakeUpFlag,_BIT_SEC);
+			BIT_CLEAR(gWakeUpFlag,_BIT_TIC);
+		//------------------------------
+		PORT_SW = PIN_SW^(1<<_TP);
+		//------------------------------			
+			adc_start(_InCurrent);					
+		}
 		if(BIT_CHECK(gWakeUpFlag,_BIT_TIC))	{
 			BIT_CLEAR(gWakeUpFlag,_BIT_TIC);
 			adc_start(_InCurrent);			
@@ -319,8 +325,6 @@ int main(void)
 			sleep_disable();
 		}
 		/* */
-		//------------------------------
-		PORT_SW = PIN_SW^(1<<_TP);
-		//------------------------------		
+		
     }
 }
