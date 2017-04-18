@@ -8,12 +8,11 @@
  -	2.35A going to 0.700A
  -	2.00A going to 0.600A
  -	1.65A going to 0.500A
- -
  -	6 sec +/-2 sec rise time
  -	20 sec +/- 5 sec falling time (2.35A only)  others on same slope
- -
  -	Delay 120 sec +/-10sec
-
+ 
+ 
  */ 
 /********************************************************************************
 Change Activity:
@@ -100,18 +99,19 @@ Version    Date       Description
 #define MY_ADDRESS		0x24
 
 
-#define BRT_H		0x12C8	//2.35A
-#define BRT_M		0x12C8	//2.00A
-#define BRT_L		0x12C8	//1.65A
-#define DIM_H		0x1264	//0.70A
-#define DIM_M		0x1264	//0.60A
-#define DIM_L		0x1264	//0.50A
+
+#define BRT_H		0x1df	//2.35A (2.346A=0x1df)
+#define BRT_M		0x198	//2.00A (2.002A=0x198) 
+#define BRT_L		0x150	//1.65A (1.650A=0x150)
+#define DIM_H		0x8c	//0.70A (0.695A=0x8c)
+#define DIM_M		0x7a	//0.60A (0.607A=0x7a)
+#define DIM_L		0x70	//0.50A (0.557A=0x70)
 //---------Slope.up time = 6sec
-#define TIMEUP_H	0x4B
-#define TIMEUP_M	0x4B
-#define TIMEUP_L	0x4B
+#define TIMEUP_H	0xa
+#define TIMEUP_M	0xb
+#define TIMEUP_L	0xc
 //---------Slope.down time = 20sec At Hi state
-#define TIMEDOWN	0x32
+#define TIMEDOWN	0x14
 //---------Delay time = 120sec
 #define TIME_DELAY	0x0F
 
