@@ -29,6 +29,7 @@ uint8_t cfg_TimeDelay = TIME_DELAY;				//SEC value
 bool nowPIR = true;
 uint8_t nowMODE = 0; //For Debugging
 uint16_t nowAMP = 0;
+uint16_t targetAMP= 0;
 
 void debug_init(void);
 uint8_t mode_init(void);
@@ -65,10 +66,10 @@ void set_gWakeUpFlag_i2c(void)
 	BIT_SET(gWakeUpFlag,_BIT_I2C);
 }
 
-void set_gWakeUpFlag_adc(void)
-{
-	BIT_SET(gWakeUpFlag,_BIT_ADC);
-}
+//void set_gWakeUpFlag_adc(void)
+//{
+//	BIT_SET(gWakeUpFlag,_BIT_ADC);
+//}
 
 /*************************************************
 callback function for update nowAMP
@@ -254,19 +255,24 @@ uint16_t set_targetAMP(uint16_t targetI, uint8_t mode)
 void set_PWM(uint16_t targetI, uint8_t mode)
 {
 	uint8_t step;
-	
-	if(nowAMP > targetI){
-	//-Current going down -> PWM up!
-		if((nowAMP-targetI)>cfg_TimeDn){step = cfg_TimeDn;
-		}else{			step = MY_MINIMUM;		}
+	uint16_t nowI = nowAMP;
+	if(nowI > (targetI) ){
+	//-Current going down -> increase PWM duty!
+		step = cfg_TimeDn;
+		if((nowI-targetI)<= step){
+			step = MY_MINIMUM;
+		}
 		BIT_SET(gCountFlag,_BIT_SLOPE_ON);	
-		pwm_write(true,step);//pwm_write(false,step);	
-	}else if(nowAMP < targetI){
-	//-Current going up -> PWM down!
-		if((targetI-nowAMP)>cfg_TimeUp[mode]){step = cfg_TimeUp[mode];
-		}else{			step = MY_MINIMUM;		}
+		pwm_write(true,step);	
+	}else if(nowI < (targetI)){
+	//-Current going up -> decrease PWM duty!
+		step = cfg_TimeUp[mode];
+		if ((targetI-nowI)<= step){
+			step = MY_MINIMUM;
+		}
+
 		BIT_SET(gCountFlag,_BIT_SLOPE_ON);
-		pwm_write(false,step);//pwm_write(true,step);		
+		pwm_write(false,step);		
 	}
 	//else{
 	//	BIT_CLEAR(gCountFlag,_BIT_SLOPE_ON);
@@ -276,9 +282,7 @@ void set_PWM(uint16_t targetI, uint8_t mode)
 /*************************************************
 ***************************************************/
 int main(void)
-{   
-	uint16_t targetAMP;
-	
+{   	
 	debug_init(); 
 	timer_init(MY_TIC_TIME);
 	usiTwi_Slave_init(MY_ADDRESS);	
@@ -303,6 +307,9 @@ int main(void)
 			BIT_CLEAR(gWakeUpFlag,_BIT_ADC);
 			targetAMP = set_targetAMP(targetAMP,nowMODE);
 			set_PWM(targetAMP,nowMODE);
+			/////////////////////////////
+			//adc_start(_InCurrent);
+			/////////////////////////////
 		}
 		if(BIT_CHECK(gWakeUpFlag,_BIT_SEC))	{
 			BIT_CLEAR(gWakeUpFlag,_BIT_SEC);

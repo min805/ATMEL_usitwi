@@ -84,8 +84,8 @@ void adc_io_init(uint8_t channel)
 bool adc_io_read(uint8_t channel)
 {
 	bool retValue=true;
-	if(BIT_CHECK(PINA,_InCurrent)){ //Invert !!
-		retValue = false;
+	if(BIT_CHECK(PINA,_InCurrent)){ 
+		retValue = false;	//Invert !!
 	}
 	return retValue;
 }

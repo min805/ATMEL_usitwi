@@ -83,17 +83,18 @@ Version    Date       Description
 #define _Temperature 34	//b0100010
 //=======================================
 								// ----- // Test	
-#define MY_TIC_TIME		781		
-#define TIC_FOR_1SEC	10							
+//#define MY_TIC_TIME		781		//0.10sec
+//#define TIC_FOR_1SEC	10							
 //#define MY_TIC_TIME	1953	//0.25sec// 0.24  
 //#define TIC_FOR_1SEC	4
-//#define MY_TIC_TIME	3906	//0.50sec
+#define MY_TIC_TIME	3906	//0.50sec
+#define TIC_FOR_1SEC	2
 //#define MY_TIC_TIME	7812	//1.00sec
-
+//#define TIC_FOR_1SEC	1
 
 
 #define MY_PWM_FREQ		240		//500Hz
-#define INIT_PWM_DUTY	240
+#define INIT_PWM_DUTY	(MY_PWM_FREQ-1)
 #define MY_MINIMUM		1
 
 #define MY_ADDRESS		0x24
@@ -107,13 +108,13 @@ Version    Date       Description
 #define DIM_M		0x7a	//0.60A (0.607A=0x7a)
 #define DIM_L		0x70	//0.50A (0.557A=0x70)
 //---------Slope.up time = 6sec
-#define TIMEUP_H	0xa
-#define TIMEUP_M	0xb
-#define TIMEUP_L	0xc
+#define TIMEUP_H	2//0xa
+#define TIMEUP_M	2//0xb
+#define TIMEUP_L	2//0xc
 //---------Slope.down time = 20sec At Hi state
-#define TIMEDOWN	0x14
+#define TIMEDOWN	2//0x14
 //---------Delay time = 120sec
-#define TIME_DELAY	0x0F
+#define TIME_DELAY	0x03
 
 //COMMAND==========================
 #define GET_CONFIG	0//0x00
@@ -134,6 +135,6 @@ Version    Date       Description
 void call_set_TxBuffer(uint8_t amount);
 void call_set_nowAMP(uint16_t adcValue);
 void set_gWakeUpFlag_i2c(void);
-void set_gWakeUpFlag_adc(void);
+//void set_gWakeUpFlag_adc(void);
 
 #endif /* MYCONFIG_H_ */

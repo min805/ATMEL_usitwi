@@ -13,12 +13,12 @@
 /*************************************************
 ***************************************************/
 
-ISR(TIM0_OVF_vect)
-{
-	TIMSK0 = 0;			//disable interrupt
-	adc_start(_InCurrent);
-	
-}
+//ISR(TIM0_OVF_vect)
+//{
+//	TIMSK0 = 0;			//disable interrupt
+//	adc_start(_InCurrent);
+//	
+//}
 
 
 /*************************************************
@@ -77,7 +77,7 @@ void pwm_init(uint8_t channel)
 	// It's 500.0Hz
 	
 	OCR0B = INIT_PWM_DUTY;		//initial set,almost 0% duty = 3.19A
-	TIMSK0 = 0;			//start from disable interrupt
+	TIMSK0 = 0;			//disable interrupt
 }
 
 /*************************************************
@@ -110,21 +110,23 @@ void pwm_write(bool inc, uint8_t step)
 	//----------------------------------------------------option #2
 	if(inc){	//---increase Duty
 		//power_on();
-		if((nowDuty+step) < nowFreq ){ 
-			OCR0B = nowDuty+step;
-		}else{
-			OCR0B = nowFreq;
-		}
+		nowDuty += step;
+		if(nowDuty >= nowFreq){ nowDuty = nowFreq-1; }
+		 
+		//if((nowDuty+step) < nowFreq ){OCR0B = nowDuty+step;
+		//}else{OCR0B = nowFreq;}
 		
 	}else{		//---decrease Duty
-		if((nowDuty-step) > 0){
-			OCR0B = nowDuty-step;
-		}else{
-			OCR0B = 0;
-		}
+		if(nowDuty > step){ nowDuty -= step;	
+		}else{ nowDuty = 0; }
+			
+		//if((nowDuty-step) > 0){OCR0B = nowDuty-step;
+		//}else{OCR0B = 0;	}
 		/*if(nowDuty == 0){power-off(); */
 	}
-	TIMSK0 = (1<<TOIE0);//Enable TOV0 interrupt
+	OCR0B = nowDuty;
+	
+	//TIMSK0 = (1<<TOIE0);//Enable TOV0 interrupt
 	//--------------------------------------------------------------
 	//-----------------------------------------------
 	//convert nowPWM to displayValue(%)
