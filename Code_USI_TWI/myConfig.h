@@ -60,8 +60,8 @@ Version    Date       Description
 #define _SW0		0	//pin2,  PORTB0
 #define _SW1		1	//pin3,  PORTB1
 #define _LCD		2	//pin5,  PORTB2
-#define _TP			2	//pin5,  PORTB2 ->external 10k pull-up
-
+//#define _TP			2	//pin5,  PORTB2 ->external 10k pull-up
+#define _DIM		2
 //PORTA=================================
 #define PORT_ADC	PORTA
 #define PIN_ADC		PINA
@@ -84,11 +84,17 @@ Version    Date       Description
 //=======================================
 								// ----- // Test	
 //#define MY_TIC_TIME		781		//0.10sec
-//#define TIC_FOR_1SEC	10							
+//#define TIC_FOR_1SEC	10	
+//--------------------------------------------						
+#define MY_TIC_TIME	1302	//0.25sec// 0.24
+#define TIC_FOR_1SEC	6
+//--------------------------------------------
 //#define MY_TIC_TIME	1953	//0.25sec// 0.24  
 //#define TIC_FOR_1SEC	4
-#define MY_TIC_TIME	3906	//0.50sec
-#define TIC_FOR_1SEC	2
+//--------------------------------------------
+//#define MY_TIC_TIME	3906	//0.50sec
+//#define TIC_FOR_1SEC	2
+//--------------------------------------------
 //#define MY_TIC_TIME	7812	//1.00sec
 //#define TIC_FOR_1SEC	1
 
@@ -101,32 +107,39 @@ Version    Date       Description
 
 
 
-#define BRT_H		0x1df	//2.35A (2.346A=0x1df)
+#define BRT_H		0x1e0	//2.35A (2.346A=0x1df)
 #define BRT_M		0x198	//2.00A (2.002A=0x198) 
 #define BRT_L		0x150	//1.65A (1.650A=0x150)
-#define DIM_H		0x8c	//0.70A (0.695A=0x8c)
-#define DIM_M		0x7a	//0.60A (0.607A=0x7a)
-#define DIM_L		0x70	//0.50A (0.557A=0x70)
+//nowDIMLevel=0//30%
+#define DIM_H		0x8d	//0.70A (0.695A=0x8c)
+#define DIM_M		0x78	//0.60A (0.607A=0x7a)
+#define DIM_L		0x6e	//0.50A (0.557A=0x70)
+//nowDIMLevel=1//50%
+#define DIM2_H		0x8d	//0.70A (0.695A=0x8c)
+#define DIM2_M		0x78	//0.60A (0.607A=0x7a)
+#define DIM2_L		0x6e	//0.50A (0.557A=0x70)
 //---------Slope.up time = 6sec
-#define TIMEUP_H	2//0xa
-#define TIMEUP_M	2//0xb
-#define TIMEUP_L	2//0xc
+#define TIMEUP_H	4
+#define TIMEUP_M	3
+#define TIMEUP_L	2
 //---------Slope.down time = 20sec At Hi state
-#define TIMEDOWN	2//0x14
+#define TIMEDOWN	1
 //---------Delay time = 120sec
-#define TIME_DELAY	0x03
+#define TIME_DELAY	0x78//0x78=120
 
 //COMMAND==========================
 #define GET_CONFIG	0//0x00
 #define GET_NOWAMP	1//0x01
 #define GET_NOWPIR	2//0x02
 #define GET_NOWMOD	3//0x03
+#define GET_NOWDIM	4
 
 #define SET_BRIGHT	17//0x11
 #define SET_DIMM	18//0x12
 #define SET_TIMEUP	19//0x13
 #define SET_TIMEDN	20//0x14
 #define SET_DELAY	21//0x15
+#define SET_DIMM2	22//0x16
 
 #define STATE_COMMAND	0x00
 #define STATE_DATA_1	0x01

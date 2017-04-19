@@ -15,24 +15,34 @@
 #include "myADC.h"
 
 
-uint8_t gWakeUpFlag;
-uint8_t gCountFlag;
-uint8_t ticCount;
-uint8_t secCount;
-//...................... 
-uint16_t cfg_Bright[4]={BRT_H,BRT_M,BRT_L,BRT_H};	//ADC value
-uint16_t cfg_Dimm[4]  ={DIM_H,DIM_M,DIM_L,DIM_H};	//ADC value
-uint8_t cfg_TimeUp[4] ={TIMEUP_H,TIMEUP_M,TIMEUP_L,TIMEUP_H};	//PWM value
+uint8_t gWakeUpFlag = 0;
+uint8_t gCountFlag  = 0;
+uint8_t ticCount = 0;
+uint8_t secCount = 0;
+//......................TEST...low,..mod...hi.. 
+//uint16_t cfg_Bright[4]={BRT_H,BRT_L,BRT_M,BRT_H};	//ADC value
+//uint16_t cfg_Dimm[4]  ={DIM_H,DIM_L,DIM_M,DIM_H};	//ADC value
+//uint16_t cfg_Dimm2[4]  ={DIM2_H,DIM2_L,DIM2_M,DIM2_H};	//ADC value	
+//uint8_t cfg_TimeUp[4] ={TIMEUP_H,TIMEUP_L,TIMEUP_M,TIMEUP_H};	//PWM value
+uint16_t table_Bright[4]={BRT_H,BRT_L,BRT_M,BRT_H};	//ADC value
+uint16_t table_Dimm0[4] ={DIM_H,DIM_L,DIM_M,DIM_H};	//ADC value
+uint16_t table_Dimm1[4] ={DIM2_H,DIM2_L,DIM2_M,DIM2_H};	//ADC value
+uint8_t  table_TimeUp[4]={TIMEUP_H,TIMEUP_L,TIMEUP_M,TIMEUP_H};	//PWM value
+
+uint16_t cfg_Bright  = 0;
+uint16_t cfg_Dimm    = 0;
+uint16_t cfg_TimeUp  = 0;
 uint8_t cfg_TimeDn	  = TIMEDOWN;				//PWM value
 uint8_t cfg_TimeDelay = TIME_DELAY;				//SEC value
 
 bool nowPIR = true;
+uint8_t nowDIMLevel = 0;
 uint8_t nowMODE = 0; //For Debugging
 uint16_t nowAMP = 0;
 uint16_t targetAMP= 0;
 
 void debug_init(void);
-uint8_t mode_init(void);
+void mode_init(void);
 void counter_reset(void);
 bool counter_is_done(uint8_t times);
 uint16_t set_targetAMP(uint16_t targetI, uint8_t mode);
@@ -103,11 +113,11 @@ void call_set_TxBuffer(uint8_t amount)
 			switch(command)
 			{
 			case GET_CONFIG:	
-				usiTwi_ByteToTxBuffer((uint8_t)((cfg_Bright[nowMODE]>>8)&0x00FF) );	
-				usiTwi_ByteToTxBuffer((uint8_t)(cfg_Bright[nowMODE]&0x00FF) );						
-				usiTwi_ByteToTxBuffer((uint8_t)((cfg_Dimm[nowMODE]>>8)&0x00FF) );
-				usiTwi_ByteToTxBuffer((uint8_t)(cfg_Dimm[nowMODE]&0x00FF) );												
-				usiTwi_ByteToTxBuffer(cfg_TimeUp[nowMODE]);
+				usiTwi_ByteToTxBuffer((uint8_t)((cfg_Bright>>8)&0x00FF) );	
+				usiTwi_ByteToTxBuffer((uint8_t)(cfg_Bright&0x00FF) );						
+				usiTwi_ByteToTxBuffer((uint8_t)((cfg_Dimm>>8)&0x00FF) );
+				usiTwi_ByteToTxBuffer((uint8_t)(cfg_Dimm&0x00FF) );												
+				usiTwi_ByteToTxBuffer(cfg_TimeUp);
 				usiTwi_ByteToTxBuffer(cfg_TimeDn);				
 				usiTwi_ByteToTxBuffer(cfg_TimeDelay);
 				state = STATE_COMMAND;
@@ -131,6 +141,11 @@ void call_set_TxBuffer(uint8_t amount)
 				usiTwi_ByteToTxBuffer(nowMODE);				
 				state = STATE_COMMAND;
 			break;
+			case GET_NOWDIM:
+			usiTwi_ByteToTxBuffer(0);
+			usiTwi_ByteToTxBuffer(nowDIMLevel);
+			state = STATE_COMMAND;
+			break;
 			case SET_BRIGHT:
 			case SET_DIMM:
 			case SET_TIMEUP:
@@ -149,15 +164,15 @@ void call_set_TxBuffer(uint8_t amount)
 			switch(command)
 			{
 			case SET_BRIGHT:
-				cfg_Bright[nowMODE] = (data_h<<8)&0xff00;
-				cfg_Bright[nowMODE] |= data;
+				cfg_Bright = (data_h<<8)&0xff00;
+				cfg_Bright |= data;
 			break;
 			case SET_DIMM:				
-				cfg_Dimm[nowMODE] = (data_h<<8)&0xff00;
-				cfg_Dimm[nowMODE] |= data;
+				cfg_Dimm = (data_h<<8)&0xff00;
+				cfg_Dimm |= data;
 			break;
 			case SET_TIMEUP:
-				cfg_TimeUp[nowMODE] = data;
+				cfg_TimeUp = data;
 			break;
 			case SET_TIMEDN:
 				cfg_TimeDn = data;
@@ -177,29 +192,38 @@ void call_set_TxBuffer(uint8_t amount)
 ***************************************************/
 void debug_init(void)
 {
-	PORT_SW &= ~(1<<_TP);	//Pull-up
-	DDR_SW |= (1<<_TP);		//0=input, 1=output(Save energy)
+//	PORT_SW &= ~(1<<_TP);	//Pull-up
+//	DDR_SW |= (1<<_TP);		//0=input, 1=output(Save energy)
 }
 
 /*************************************************/
-uint8_t mode_init(void)
+void mode_init(void)
 {
-	uint8_t retValue = 0;
+	uint8_t retMode = 0;
 	//pull up, input
 	//MCUCR &= ~(1<<PUD);
 	//Add external full up!!
-	PORT_SW |= ~((1<<_SW0)|(1<<_SW1));// tri-state(hi-z)
-	DDR_SW  &= ~((1<<_SW0)|(1<<_SW1));
+	PORT_SW |= ~((1<<_SW0)|(1<<_SW1)|(1<<_DIM));// tri-state(hi-z)
+	DDR_SW  &= ~((1<<_SW0)|(1<<_SW1)|(1<<_DIM));
+
+	if(PINB & (1<<_DIM)){	nowDIMLevel=1;		//50%
+	}else{					nowDIMLevel=0;	}	//30%	
 	
-	if(PINB & (1<<_SW0)){ retValue |= 0x01;}
-	if(PINB & (1<<_SW1)){ retValue |= 0x02;}
+	if(PINB & (1<<_SW0)){ retMode |= 0x01;}
+	if(PINB & (1<<_SW1)){ retMode |= 0x02;}
+	nowMODE = retMode & 0x03;
 	
-	if (retValue == 0x03){
+	cfg_Bright = table_Bright[nowMODE];
+	if(nowDIMLevel == 0){	cfg_Dimm = table_Dimm0[nowMODE];
+	}else{					cfg_Dimm = table_Dimm1[nowMODE];}
+	cfg_TimeUp = table_TimeUp[nowMODE];
+	
+	if (nowMODE == 0x0){			//TEST MODE
 		cfg_TimeDelay = MY_MINIMUM;	//1.0sec 
-	}else if(retValue > 0x03){
-		 retValue = 0;
 	}
-	return retValue;
+	//back to pin out - save energy
+	//DDR_SW |= (1<<_SW0)|(1<<_SW1)|(1<<_DIM);
+
 }
 
 /*************************************************/
@@ -240,12 +264,12 @@ uint16_t set_targetAMP(uint16_t targetI, uint8_t mode)
 {
 	uint16_t retAMP = targetI;
 	nowPIR = adc_io_read(_InSensor);
-	if(nowPIR){	//Got Object
-		retAMP = cfg_Bright[mode];
+	if(!nowPIR){	//Got Object
+		retAMP = cfg_Bright;
 		counter_reset();
 	}else{
 		if(counter_is_done(cfg_TimeDelay)){
-			retAMP = cfg_Dimm[mode];
+			retAMP = cfg_Dimm;
 		}
 	}	
 	return retAMP;
@@ -266,11 +290,10 @@ void set_PWM(uint16_t targetI, uint8_t mode)
 		pwm_write(true,step);	
 	}else if(nowI < (targetI)){
 	//-Current going up -> decrease PWM duty!
-		step = cfg_TimeUp[mode];
+		step = cfg_TimeUp;
 		if ((targetI-nowI)<= step){
 			step = MY_MINIMUM;
 		}
-
 		BIT_SET(gCountFlag,_BIT_SLOPE_ON);
 		pwm_write(false,step);		
 	}
@@ -289,13 +312,13 @@ int main(void)
 	pwm_init(_OutPWM);
 	adc_init();
 	adc_io_init(_InSensor);
-
+	mode_init();
+	targetAMP = cfg_Bright;	//Set initial value, after mode_init()
+	
 	set_sleep_mode(SLEEP_MODE_IDLE);
 	wdt_enable(WDTO_8S);
 
-	adc_start(_InCurrent);	
-	nowMODE = mode_init();
-	targetAMP = cfg_Bright[nowMODE];
+	adc_start(_InCurrent);		
 	sei();
 	while(1)
     {
@@ -315,7 +338,7 @@ int main(void)
 			BIT_CLEAR(gWakeUpFlag,_BIT_SEC);
 			BIT_CLEAR(gWakeUpFlag,_BIT_TIC);
 		//------------------------------
-		PORT_SW = PIN_SW^(1<<_TP);
+		//PORT_SW = PIN_SW^(1<<_TP);
 		//------------------------------			
 			adc_start(_InCurrent);					
 		}
